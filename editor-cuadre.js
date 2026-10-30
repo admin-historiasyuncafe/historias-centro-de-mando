@@ -372,7 +372,7 @@
     var v = E.cur[d.id], a = 'id="cx-' + d.id + '" data-id="' + esc(d.id) + '"' + (compacto ? ' aria-label="' + esc(d.etq) + '"' : '');
     if (d.tipo === 'check') {
       return compacto ? '<label class="cx-ck"><input type="checkbox" ' + a + (v ? ' checked' : '') + '></label>'
-        : '<label class="cx-chk" for="cx-' + d.id + '"><input type="checkbox" ' + a + (v ? ' checked' : '') + '><span>' + esc(d.etq) + '</span></label>';
+        : '<label class="cx-chk" for="cx-' + d.id + '"><input type="checkbox" ' + a + (v ? ' checked' : '') + '><span>' + esc(v && d.etqOn ? d.etqOn : d.etq) + '</span></label>';
     }
     if (d.tipo === 'dinero') return '<div class="cx-pre"><span>$</span><input class="cx-in" ' + a + ' inputmode="decimal" autocomplete="off" value="' + esc(v === '' ? '' : v) + '"></div>';
     if (d.tipo === 'entero') return '<input class="cx-in" ' + a + ' inputmode="numeric" autocomplete="off" value="' + esc(v === '' ? '' : v) + '">';
@@ -420,6 +420,10 @@
     var d = E.campos[id], r = leer(d, el);
     if (r.ok) { E.cur[id] = r.val; delete E.err[id]; } else { E.err[id] = r.msg; }
     marcar(id);
+    if (d.tipo === 'check' && d.etqOn) {                      // "Closeout" pasa a "Closeout hecho" al marcarla
+      var tx = q('[data-f="' + id + '"] .cx-chk span', root);
+      if (tx) tx.textContent = E.cur[id] ? d.etqOn : d.etq;
+    }
     if (d.grupo === 'billetes') {
       var t = q('[data-t="' + id + '"]', root); if (t) t.textContent = fm(num(d.den) * num(E.cur[id]));
     }

@@ -13,7 +13,7 @@
   var API_URL = 'https://script.google.com/macros/s/AKfycbxkLZ2ofclY2BGIMSRPJ8rlykd2qkAfF_Ig9jU-cl_j33NzVs8jRaQ21__yzhBXOcDKFQ/exec';
 
   // Sube este numero cuando cambies editor-cuadre.js, para que los telefonos bajen la version nueva.
-  var VERSION_EDITOR = '1';
+  var VERSION_EDITOR = '2';
 
   // Si la pagina corre dentro de Apps Script, no hace falta el puente.
   if (window.google && window.google.script && window.google.script.run) return;

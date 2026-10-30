@@ -3,16 +3,23 @@
  * Imita google.script.run usando fetch (POST) hacia el web app de Apps Script,
  * asi index.html funciona sin cambiar nada de su logica ni de su diseño.
  * El PIN viaja en el cuerpo del POST, nunca en la direccion.
+ *
+ * Tambien carga editor-cuadre.js (la pantalla para llenar el cuadre del dia) cuando la
+ * pagina termina de abrir. Por eso index.html no necesita ningun cambio.
  */
 (function () {
   'use strict';
 
   var API_URL = 'https://script.google.com/macros/s/AKfycbxkLZ2ofclY2BGIMSRPJ8rlykd2qkAfF_Ig9jU-cl_j33NzVs8jRaQ21__yzhBXOcDKFQ/exec';
 
+  // Sube este numero cuando cambies editor-cuadre.js, para que los telefonos bajen la version nueva.
+  var VERSION_EDITOR = '1';
+
   // Si la pagina corre dentro de Apps Script, no hace falta el puente.
   if (window.google && window.google.script && window.google.script.run) return;
 
-  var FUNCIONES = ['getUsuarios', 'iniciarSesion', 'cerrarSesion', 'getMeses', 'getDatosMes'];
+  var FUNCIONES = ['getUsuarios', 'iniciarSesion', 'cerrarSesion', 'getMeses', 'getDatosMes',
+    'getCuadreEdicion', 'guardarCuadre'];
 
   function runner(ok, fail) {
     var r = {
@@ -50,4 +57,16 @@
   }
 
   window.google = { script: { run: runner() } };
+
+  // Carga la pantalla de llenado del cuadre, que vive junto a este archivo.
+  var propio = document.currentScript && document.currentScript.src;
+  var base = propio ? propio.replace(/[^\/]*$/, '') : '';
+  function cargarEditor() {
+    var s = document.createElement('script');
+    s.src = base + 'editor-cuadre.js?v=' + VERSION_EDITOR;
+    s.async = true;
+    document.body.appendChild(s);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', cargarEditor);
+  else cargarEditor();
 })();

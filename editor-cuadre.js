@@ -11,7 +11,8 @@
 (function () {
   'use strict';
 
-  var DIAS_ATRAS = 6; // hoy y 6 días atrás. El servidor es quien manda (ESCRITURA.DIAS_EDITABLES en Escritura.gs)
+  var DIAS_ATRAS = 30;   // hoy y 30 días atrás = ESCRITURA.DIAS_EDITABLES (31) en Escritura.gs. El servidor es quien manda.
+  var DIAS_EN_LISTA = 14; // días que se muestran en el selector; más atrás se llega con "Otra fecha…" o desde el día elegido en el tablero
   var GRUPOS = { billetes: 'Cantidad de billetes y monedas' };
 
   var E = { fecha: null, sel: null, estado: null, campos: {}, orig: {}, cur: {}, err: {}, avisos: [], req: 0,
@@ -162,12 +163,20 @@
     });
   }
 
+  /* Al abrir, usa el día que estás viendo en el tablero (si se puede editar); si no, hoy. */
+  function fechaInicial() {
+    var hoy = hoyPR(), d = (typeof S !== 'undefined' && S.dia) ? S.dia : hoy;
+    return (d <= hoy && d >= restarDias(hoy, DIAS_ATRAS)) ? d : hoy;
+  }
+
   function poblarFechas() {
-    var hoy = hoyPR(), html = '';
-    for (var i = 0; i <= DIAS_ATRAS; i++) {
+    var hoy = hoyPR(), html = '', esta = false;
+    for (var i = 0; i < DIAS_EN_LISTA; i++) {
       var f = restarDias(hoy, i), pre = i === 0 ? 'Hoy, ' : i === 1 ? 'Ayer, ' : '';
+      if (f === E.sel) esta = true;
       html += '<option value="' + f + '">' + esc(pre + larga(f)) + '</option>';
     }
+    if (!esta && E.sel !== 'otra') html += '<option value="' + E.sel + '">' + esc(larga(E.sel)) + '</option>';
     html += '<option value="otra">Otra fecha…</option>';
     q('#cxFecha').innerHTML = html;
     q('#cxFecha').value = E.sel;
@@ -178,7 +187,7 @@
     if (typeof S === 'undefined' || !S.token) return;
     root.hidden = false;
     document.body.style.overflow = 'hidden';
-    E.fecha = hoyPR(); E.sel = E.fecha;
+    E.fecha = fechaInicial(); E.sel = E.fecha;
     poblarFechas();
     var o = q('#cxOtra'); o.hidden = true; o.value = '';
     cargar();
@@ -292,6 +301,7 @@
 
   function seccion(sec) {
     var h = '<section class="cx-card" data-s="' + esc(sec.id) + '"><h3>' + esc(sec.titulo) + '</h3>', i = 0, c = sec.campos;
+    if (sec.aviso) return h + '<p class="cx-arch">' + esc(sec.aviso) + '</p></section>';
     while (i < c.length) {
       if (c[i].grupo) {
         var g = c[i].grupo, filas = '';

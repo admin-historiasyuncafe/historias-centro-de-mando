@@ -101,13 +101,21 @@
     '.cx-centro{text-align:center;padding:48px 16px}',
     '.cx-bar{flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--borde);background:var(--barra);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}',
     '.cx-st{flex:1;font-size:14px;color:var(--texto2)}.cx-st.mal{color:var(--hibisco)}.cx-st.bien{color:var(--ok);font-weight:600}',
-    '.cx-bar .btn{min-height:46px;padding:0 22px;font-size:15px}.cx-bar .btn:disabled{opacity:.4;cursor:default}'
+    '.cx-bar .btn{min-height:46px;padding:0 22px;font-size:15px}.cx-bar .btn:disabled{opacity:.4;cursor:default}',
+    '.cx-fab{position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:60;display:inline-flex;align-items:center;gap:8px;min-height:52px;padding:0 20px;border:0;border-radius:999px;background:linear-gradient(135deg,var(--mar),var(--mar2));color:#04201E;font:600 15px var(--sans);box-shadow:0 14px 30px -10px rgba(0,0,0,.6);cursor:pointer}',
+    '.cx-fab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}',
+    'body.sin-sesion .cx-fab{display:none}'
   ].join('\n');
 
   /* ───────── Pantalla ───────── */
+  function estilos() {
+    if (document.getElementById('cx-css')) return;
+    var st = document.createElement('style'); st.id = 'cx-css'; st.textContent = CSS; document.head.appendChild(st);
+  }
+
   function crear() {
     if (root) return;
-    var st = document.createElement('style'); st.id = 'cx-css'; st.textContent = CSS; document.head.appendChild(st);
+    estilos();
     root = document.createElement('div');
     root.className = 'cx'; root.hidden = true;
     root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true'); root.setAttribute('aria-labelledby', 'cxTitulo');
@@ -413,12 +421,22 @@
   function montar() {
     var barraTop = q('.barra-in');
     if (!barraTop || document.getElementById('btnLlenar')) return;
+    estilos();
+    var icono = '<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
+    // Botón de la barra superior (en el teléfono solo se ve el lápiz)
     var b = document.createElement('button');
     b.className = 'ib'; b.id = 'btnLlenar'; b.type = 'button';
     b.setAttribute('aria-label', 'Llenar el cuadre del día');
-    b.innerHTML = '<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg><span class="tx">Llenar cuadre</span>';
+    b.innerHTML = icono + '<span class="tx">Llenar cuadre</span>';
     barraTop.insertBefore(b, document.getElementById('btnTema') || null);
     b.addEventListener('click', abrir);
+    // Botón flotante con texto, siempre a la vista
+    var f = document.createElement('button');
+    f.className = 'cx-fab'; f.id = 'btnLlenarFab'; f.type = 'button';
+    f.setAttribute('aria-label', 'Llenar el cuadre del día');
+    f.innerHTML = icono + '<span>Llenar cuadre</span>';
+    document.body.appendChild(f);
+    f.addEventListener('click', abrir);
   }
   montar();
 })();
